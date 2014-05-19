@@ -25,7 +25,6 @@ source("/home/jc140298/NRM/dev/helperFunctions.R") # function getVettingThreshol
 taxon.dir = paste(wd, "/", taxon, sep="")
 sp.wd = paste(taxon.dir, "/models/", sp, "/1km", sep="")
 buffer.wd = paste(sp.wd, "/buffer", sep=""); dir.create(buffer.wd); setwd(buffer.wd)
-image.folder = paste(buffer.wd, "/images", sep=""); dir.create(image.folder)
 
 # list the projections
 tfiles = list.files(sp.wd, pattern="asc.gz", full.names=TRUE)[-1]
@@ -94,11 +93,16 @@ coords = rasterToPoints(rbuffpoly)[,-3,drop=FALSE]
 cellNums = cellFromXY(tempmap, coords)
 tempmap[cellNums] = 1
 writeRaster(tempmap, paste(buffer.wd, "/buffer_clip_", years[1], sep=""), format="ascii")
+system("gzip *.asc")
 
 # for each decade, take the previous threshold poly, add buffer, combine with next
 # decade's projection 
 for (sc in scenarios[1]) { cat(sc,'\n')
 
+	# create a directory to hold the output
+	scenario.wd = paste(buffer.wd, "/", sc, sep=""); dir.create(scenario.wd); setwd(scenario.wd)
+	image.folder = paste(scenario.wd, "/images", sep=""); dir.create(image.folder)
+		
 	for (dd in 2:length(years)) { cat(years[dd],'\n')# projections start at 2015
 
 		# read in projected distribution asc
@@ -114,11 +118,15 @@ if (dd == 2) {
 }
 dev.off()		
 		# read in the dispersal clipping asc (based on previous years' threshold map)
-		clip.asc = read.asc(paste(buffer.wd, "/buffer_clip_", years[dd-1], ".asc", sep=""))
+		if (dd == 2) {
+			clip.asc = read.asc.gz(paste(buffer.wd, "/buffer_clip_", years[dd-1], ".asc.gz", sep=""))
+		} else {
+			clip.asc = read.asc.gz(paste("buffer_clip_", years[dd-1], ".asc.gz", sep=""))
+		}
 		
 		# clip projection to dispersal dist
 		disp.proj.asc = clip.asc*proj.asc
-		write.asc.gz(disp.proj.asc, paste(buffer.wd, "/", sc, "_", years[dd], "_realized.asc",sep=""))
+		write.asc.gz(disp.proj.asc, paste(years[dd], "_realized.asc", sep=""))
 	
 		# create a png of realized distribution
 		cols = c('gray',colorRampPalette(c("tan","forestgreen"))(100))
@@ -134,7 +142,7 @@ dev.off()
 		t.disp.proj.asc = disp.proj.asc
 		t.disp.proj.asc[which(is.finite(t.disp.proj.asc) & t.disp.proj.asc>=threshold)] = 1
 		t.disp.proj.asc[which(is.finite(t.disp.proj.asc) & t.disp.proj.asc<threshold)] = 0 
-		write.asc.gz(t.disp.proj.asc, paste(buffer.wd, "/threshold_", sc, "_", years[dd], "_realized.asc",sep=""))
+		write.asc.gz(t.disp.proj.asc, paste(years[dd], "_realized_threshold.asc",sep=""))
 		# extract the class stats
 		out.realized = rbind(out.realized, 
 			data.frame(date=paste(sc, "_", years[dd], sep=""),ClassStat(t.disp.proj.asc,latlon=TRUE))) 
@@ -161,16 +169,26 @@ dev.off()
 		# get the cell number of those coordinates and use them to reset map values
 		newcellNums = cellFromXY(newtempmap, newcoords)
 		newtempmap[newcellNums] = 1
-		writeRaster(newtempmap, paste(buffer.wd, "/buffer_clip_", years[dd], sep=""), format="ascii")
-
+		writeRaster(newtempmap, paste("buffer_clip_", years[dd], sep=""), format="ascii")
+		system("gzip *.asc")
+		
 	} # end for dd
+
+	#remove information on background cells
+	out.realized = out.realized[which(out.realized$class==1),]
+
+	#save class stats
+	write.csv(out.realized, paste("summary.data.disp.", buffers[2], "km.per.yr.csv", sep=""), 
+		row.names=FALSE)
+	
 } # end for scenarios
 
-#remove information on background cells
-out.realized = out.realized[which(out.realized$class==1),]
+##remove information on background cells
+#out.realized = out.realized[which(out.realized$class==1),]
 
-# zip asc files to save space
-system("gzip *.asc")
+##save class stats
+#write.csv(out.realized, paste("summary.data.disp.", buffers[2], "km.per.yr.csv", sep=""), 
+#	row.names=FALSE)
 
-#save class stats
-write.csv(out.realized, paste("summary.data.disp.", buffers[2], "km.per.yr.csv", sep=""), row.names=FALSE)
+## zip asc files to save space
+#system("gzip *.asc")

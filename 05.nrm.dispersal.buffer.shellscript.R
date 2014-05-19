@@ -16,14 +16,15 @@ samp.spp = list(c(120,138,151,159,189,206,207,208,230,242), 	#mammals
 	c(6,11,81,106,133,156,160,198,202,223))						#amphibians
 
 #for (taxon in taxa[3:4]) {
-taxon=taxa[4]
+taxon=taxa[1]
 	taxon.dir = paste(wd, "/", taxon, sep="")
 	
 	# get a list of species directories
 	species.names = list.files(paste(taxon.dir, "/models", sep="")) #get a list of all the species
 
-	for (sp in species.names[samp.spp[[which(taxa==taxon)]][-3]]) { # cycle through each of the species
-#sp=species.names[samp.spp[[3]][1]]
+#	for (sp in species.names[samp.spp[[which(taxa==taxon)]]]) { # cycle through each of the species
+#sp=species.names[samp.spp[[1]][3]]
+sp=species.names[206]
 		# create the species specific working directory
 		sp.wd = paste(taxon.dir, "/models/", sp, "/1km", sep="")
 		
@@ -33,8 +34,8 @@ taxon=taxa[4]
 		shell.file = file(shell.file.name, "w")
 			cat('#!/bin/bash\n', file=shell.file)
 			cat('#PBS -j oe\n', file=shell.file) # combine stdout and stderr into one file
-			cat('#PBS -l pmem=16gb\n', file=shell.file)
-			cat('#PBS -l nodes=1:ppn=8\n', file=shell.file)
+			cat('#PBS -l pmem=46gb\n', file=shell.file)
+			cat('#PBS -l nodes=1:ppn=22\n', file=shell.file)
 #			cat('#PBS -q bigmem\n', file=shell.file)
 			cat('#PBS -l walltime=9999:00:00\n', file=shell.file)
 			cat('cd $PBS_O_WORKDIR\n', file=shell.file)
