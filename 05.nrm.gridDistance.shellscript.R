@@ -10,19 +10,19 @@ wd = "/rdsi/ccimpacts/NRM"
 taxa = c("mammals", "birds", "reptiles", "amphibians")
 
 # run on a sample of species first to test
-samp.spp = list(c(120,138,151,159,189,206,207,208,230,242), 	#mammals
+samp.spp = list(c(106,123,134,142,167,184,185,186,207,218), 	#mammals
 	c(28,47,50,88,167,225,396,492,557,558), 					#birds
-	c(46,91,118,251,313,361,402,507,513,588),					#reptiles
-	c(6,11,81,106,133,156,160,198,202,223))						#amphibians
+	c(41,79,104,281,314,431,437,503),					#reptiles
+	c(6,9,69,92,119,142,146,182,185,204))						#amphibians
 
 #for (taxon in taxa[3:4]) {
-taxon=taxa[3]
+taxon=taxa[4]
 	taxon.dir = paste(wd, "/", taxon, sep="")
 	
 	# get a list of species directories
 	species.names = list.files(paste(taxon.dir, "/models", sep="")) #get a list of all the species
 
-	for (sp in species.names[samp.spp[[which(taxa==taxon)]][-1]]) { # cycle through each of the species
+	for (sp in species.names[-samp.spp[[which(taxa==taxon)]]]) { # cycle through each of the species
 #sp=species.names[samp.spp[[3]][1]]
 #sp=species.names[206]
 		# create the species specific working directory

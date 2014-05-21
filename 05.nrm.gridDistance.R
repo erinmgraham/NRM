@@ -61,21 +61,19 @@ raster.vet.cur.asc = raster.from.asc(t.vet.cur.asc, projs=CRS("+proj=longlat +da
 raster.vet.cur.asc[is.na(raster.vet.cur.asc)] = 3
 
 # create the distance raster
-Sys.time()
 gD.vet.cur = gridDistance(raster.vet.cur.asc, origin=1, omit=3)
-Sys.time()
+writeRaster(gD.vet.cur, paste(distance.wd, "/distance_raster_", years[1], sep=""), format="ascii")
+system("gzip *.asc")
 
 # copy distance raster and convert to binary based on dispersal distance
 cp.gD.vet.cur = gD.vet.cur 
 cp.gD.vet.cur[cp.gD.vet.cur <= disp.dist[1]] = 1
 cp.gD.vet.cur[cp.gD.vet.cur > disp.dist[1]] = 0
-
-writeRaster(cp.gD.vet.cur, paste(distance.wd, "/distance_clip_", years[1], sep=""), format="ascii")
-system("gzip *.asc")
+#writeRaster(cp.gD.vet.cur, paste(distance.wd, "/distance_clip_", years[1], sep=""), format="ascii")
 
 # for each decade, take the previous distance raster, combine with next year's projection, then 
 #	apply a threshold to create a realized distribution and create the next year's distance raster
-for (sc in scenarios[1]) { cat(sc,'\n')
+for (sc in scenarios) { cat(sc,'\n')
 
 	# create a directory to hold the output
 	scenario.wd = paste(distance.wd, "/", sc, sep=""); dir.create(scenario.wd); setwd(scenario.wd)
@@ -88,15 +86,13 @@ for (sc in scenarios[1]) { cat(sc,'\n')
 	
 		# read in the dispersal clipping asc (based on previous years' threshold map)
 		if (dd == 2) {
-			clip.asc = read.asc.gz(paste(distance.wd, "/distance_clip_", years[dd-1], ".asc.gz", sep=""))
+#			clip.asc = read.asc.gz(paste(distance.wd, "/distance_clip_", years[dd-1], ".asc.gz", sep=""))
+			clip.asc = asc.from.raster(cp.gD.vet.cur)
 		} else {
-			clip.asc = read.asc.gz(paste("distance_clip_", years[dd-1], ".asc.gz", sep=""))
+#			clip.asc = read.asc.gz(paste("distance_clip_", years[dd-1], ".asc.gz", sep=""))
+			clip.asc = asc.from.raster(new.cp.gD.vet.cur)
 		}
-# for troubleshooting		
-pdf(paste("projected_", years[dd], "_distance_clip_", years[dd-1], ".pdf", sep=""))
-out.asc = proj.asc+clip.asc
-plot(raster(out.asc))
-dev.off()			
+			
 		# clip projection to dispersal dist
 		disp.proj.asc = proj.asc*clip.asc
 #		write.asc.gz(disp.proj.asc, paste(years[dd], "_realized.asc", sep=""))
@@ -114,17 +110,16 @@ dev.off()
 		r.vet.cur.asc[is.na(r.vet.cur.asc)] = 3
 
 		# create the distance raster
-		Sys.time()
 		new.gD.vet.cur = gridDistance(r.vet.cur.asc, origin=1, omit=3)
-		Sys.time()
-
+		writeRaster(new.gD.vet.cur, paste("distance_raster_", years[dd], sep=""), format="ascii")		
+	
 		# copy distance raster and convert to binary based on dispersal distance
 		new.cp.gD.vet.cur = new.gD.vet.cur 
 		new.cp.gD.vet.cur[new.cp.gD.vet.cur <= disp.dist[dd]] = 1
 		new.cp.gD.vet.cur[new.cp.gD.vet.cur > disp.dist[dd]] = 0
+#		writeRaster(new.cp.gD.vet.cur, paste("distance_clip_", years[dd], sep=""), format="ascii")
 
-		writeRaster(new.cp.gD.vet.cur, paste("distance_clip_", years[dd], sep=""), format="ascii")
-		system("gzip *.asc")
-		
 	} # end for dd	
+	
+	system("gzip *.asc")
 } # end for scenarios
