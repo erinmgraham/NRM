@@ -16,7 +16,7 @@ scenarios.dir = "/rdsi/ctbcc_data/Climate/CIAS/Australia"
 maxent.jar = "/home/jc140298/maxent.jar" 
 
 # for each taxon
-for (taxon in taxa[4]) {
+for (taxon in taxa[1]) {
 
 	# define the taxon dir
 	taxon.dir = paste(wd, "/", taxon, sep="")
@@ -25,7 +25,7 @@ for (taxon in taxa[4]) {
 	species = list.files(paste(taxon.dir, "/models", sep=""))
 
 	# for each species
-	for (sp in species) {
+	for (sp in species[158]) {
 	
 		# for each scale
 #		for (m in 1:length(scales)) {
@@ -58,29 +58,28 @@ m=2
 		shell.file = file(shell.file.name, "w")
 			cat('#!/bin/bash\n', file=shell.file)
 			cat('#PBS -j oe\n', file=shell.file) # combine stdout and stderr into one file
-			cat('#PBS -l walltime=100:00:00\n', file=shell.file)
+			cat('#PBS -l pmem=8gb\n', file=shell.file)
 			cat('#PBS -l nodes=1:ppn=4\n', file=shell.file)
-#			cat('#PBS -l pmem=8gb\n', file=shell.file)
+			cat('#PBS -l walltime=100:00:00\n', file=shell.file)
 			cat('cd $PBS_O_WORKDIR\n', file=shell.file)
 			cat('source /etc/profile.d/modules.sh\n', file=shell.file) # need for java
 			cat('module load java\n', file=shell.file) # need for maxent
 			# first run maxent with 10 replicates
-#			cat('java -mx2048m -jar ',maxent.jar, ' -e ',bkgd.data, ' -s ',occur.data, ' -o ',sp.wd, ' nothreshold nowarnings novisible replicates=10 nooutputgrids -r -a \n', sep="", file=shell.file)
+			cat('java -mx2048m -jar ',maxent.jar, ' -e ',bkgd.data, ' -s ',occur.data, ' -o ',sp.wd, ' nothreshold nowarnings novisible replicates=10 nooutputgrids -r -a \n', sep="", file=shell.file)
 			# rename the results file so it won't be overwritten
-#			cat('cp -af ',sp.wd, '/maxentResults.csv ',sp.wd, '/maxentResults.crossvalid.csv\n', sep="", file=shell.file)
+			cat('cp -af ',sp.wd, '/maxentResults.csv ',sp.wd, '/maxentResults.crossvalid.csv\n', sep="", file=shell.file)
 			# run maxent again on full model
-#			cat('java -mx2048m -jar ',maxent.jar, ' -e ',bkgd.data, ' -s ',occur.data, ' -o ',sp.wd, ' nothreshold nowarnings novisible nowriteclampgrid nowritemess writeplotdata -P -J -r -a \n', sep="", file=shell.file)
+			cat('java -mx2048m -jar ',maxent.jar, ' -e ',bkgd.data, ' -s ',occur.data, ' -o ',sp.wd, ' nothreshold nowarnings novisible nowriteclampgrid nowritemess writeplotdata -P -J -r -a \n', sep="", file=shell.file)
 			
 			# project maxent model
-			for (pr in scenarios.torun[293:340]) {
+			for (pr in scenarios.torun) {
 				cat('java -cp ',maxent.jar, ' density.Project ',sp.wd, '/',sp, '.lambdas ',pr, ' ', basename(pr), '.asc nowriteclampgrid nowritemess fadebyclamping \n', sep="", file=shell.file)
 				# zip it
 				cat('gzip ', basename(pr), '.asc\n', sep="", file=shell.file)
 			}
-
 		close(shell.file)
-		system(paste("qsub -l nodes=1:ppn=4 ", shell.file.name, sep=""))
-#		system(paste("qsub -l nodes=1:ppn=4 -l pmem=8gb", shell.file.name, sep=""))		
+		
+		system(paste("qsub ", shell.file.name, sep=""))
 		Sys.sleep(5) # wait 5 sec between job submissions
 	} # end for species
 } # end for taxon
