@@ -16,7 +16,7 @@ samp.spp = list(c(106,123,134,142,167,184,185,186,207,218), 	#mammals
 	c(6,9,69,92,119,142,146,182,185,204))						#amphibians
 
 #for (taxon in taxa[3:4]) {
-taxon=taxa[4]
+taxon=taxa[3]
 	taxon.dir = paste(wd, "/", taxon, sep="")
 	
 	# get a list of species directories

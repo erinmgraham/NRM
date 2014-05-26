@@ -66,9 +66,9 @@ writeRaster(gD.vet.cur, paste(distance.wd, "/distance_raster_", years[1], sep=""
 system("gzip *.asc")
 
 # copy distance raster and convert to binary based on dispersal distance
-cp.gD.vet.cur = gD.vet.cur 
-cp.gD.vet.cur[cp.gD.vet.cur <= disp.dist[1]] = 1
-cp.gD.vet.cur[cp.gD.vet.cur > disp.dist[1]] = 0
+#cp.gD.vet.cur = gD.vet.cur 
+#cp.gD.vet.cur[cp.gD.vet.cur <= disp.dist[1]] = 1
+#cp.gD.vet.cur[cp.gD.vet.cur > disp.dist[1]] = 0
 #writeRaster(cp.gD.vet.cur, paste(distance.wd, "/distance_clip_", years[1], sep=""), format="ascii")
 
 # for each decade, take the previous distance raster, combine with next year's projection, then 
