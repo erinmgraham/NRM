@@ -76,19 +76,27 @@ for (sc in scenarios) { cat(sc,'\n')
 	
 		# read in the dispersal distance asc and convert it into a binary clipping asc
 		#	based on dispersal distance for that year's projection
-		clip.asc = gD.vet.cur
-		clip.asc[clip.asc <= disp.dist[dd]] = 1
-		clip.asc[clip.asc > disp.dist[dd]] = 0
-		writeRaster(raster(clip.asc), paste("distance_clip_", years[dd], sep=""), format="ascii")
-
+		raster.clip = gD.vet.cur
+		raster.clip[raster.clip <= disp.dist[dd]] = 1
+		raster.clip[raster.clip > disp.dist[dd]] = 0
+		writeRaster(raster.clip, paste("distance_clip_", years[dd], sep=""), format="ascii")
+# for troubleshooting
+pdf(paste("distance_clip_", years[dd], ".pdf", sep=""))
+plot(raster.clip)
+dev.off()
 		# read in projected suitability distribution asc
 		proj.filename = paste(sp.wd, "/suitability/", sc, "_", years[dd], "_suitability.asc.gz", sep="")
 		proj.asc = read.asc.gz(proj.filename) 
 
 		# clip projection to dispersal dist
+		# need raster as asc
+		clip.asc = asc.from.raster(raster.clip)
 		disp.proj.asc = proj.asc*clip.asc
 		write.asc.gz(disp.proj.asc, paste(years[dd], "_realized.asc", sep=""))
-
+# for troubleshooting
+pdf(paste(years[dd], "_realized.pdf", sep=""))
+plot(raster(disp.proj.asc))
+dev.off()
 		} # end for dd	
 	
 	system("gzip *.asc")
