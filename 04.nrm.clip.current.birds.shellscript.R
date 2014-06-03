@@ -12,9 +12,11 @@ taxon.dir = paste(wd, "/", taxon, sep="")
 
 # get a list of species directories
 species.names = list.files(paste(taxon.dir, "/models", sep="")) #get a list of all the species
-#samp.spp = species.names[]
+noPolygons = c(21,23,27,31,46,48,49,51,52,54,69,72,77,100,102,113,118,119,132:135,143,175,187,190,
+	204,209,211,219,229,235,248,279,283,288,292,319,344,346,368,369,397,409,418,426,432,448,454,
+	472,489,516,523,524,542,546,556,559,583,591,592)
 
-for (sp in species.names[-c(28,47,50,88,167,225,396,492,557,558)]) { # cycle through each of the species
+for (sp in species.names[-noPolygons]) { # cycle through each of the species
 
 	# create the species specific working directory
 	sp.wd = paste(taxon.dir, "/models/", sp, "/1km", sep="")

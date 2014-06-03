@@ -22,11 +22,13 @@ library(maptools)
 taxon.dir = paste(wd, "/", taxon, sep="")
 sp.wd = paste(taxon.dir, "/models/", sp, "/1km", sep="")
 		
-# create warren dir to hold output files
-warren.wd = paste(sp.wd, "/warren", sep=""); dir.create(warren.wd); setwd(warren.wd)
+# create realized dir to hold output files
+real.wd = paste(sp.wd, "/realized", sep=""); dir.create(real.wd); setwd(real.wd)
 
-# read in the current maxent predicted distribution
-predicted.cur.asc = read.asc.gz(paste(sp.wd, "/bioclim.asc.gz", sep="")) 
+## read in the current maxent predicted distribution
+#predicted.cur.asc = read.asc.gz(paste(sp.wd, "/bioclim.asc.gz", sep="")) 
+# read in the current suitability distribution
+suitability.cur.asc = read.asc.gz(paste(sp.wd, "/suitability/bioclim_suitability.asc.gz", sep=""))
 
 # read in the Birdlife to species.names key 
 bird.key = read.csv("/home/jc140298/NRM/Birdlife_polygons_key.csv")
@@ -42,14 +44,20 @@ if (length(sp.id) != 0) {
 }	
 	
 # convert the poly to raster to asc 
-# first need predicted asc to be a "blank" template and a raster
-bird.asc = predicted.cur.asc; bird.asc[which(is.finite(bird.asc))] = 0; bird.clip.raster=raster(bird.asc)
+# first need suitability asc to be a "blank" template and a raster
+bird.asc = suitability.cur.asc; bird.asc[which(is.finite(bird.asc))] = 0; bird.clip.raster=raster(bird.asc)
 bird.poly.raster = rasterize(bird.poly, bird.clip.raster)
 coords = rasterToPoints(bird.poly.raster)[,-3,drop=FALSE]
 cellNums = cellFromXY(bird.clip.raster, coords)
 bird.clip.raster[cellNums] = 1
 writeRaster(bird.clip.raster, "bird_clip.asc"); system("gzip bird_clip.asc")
 
+# apply the birdlife clipping asc
+bird.clip.asc = asc.from.raster(bird.clip.raster)
+vet.suit.cur.asc = bird.clip.asc*suitability.cur.asc
+write.asc.gz(vet.suit.cur.asc, "vet.suit.cur.asc")
+
+# create binary vetted suitability current distribution
 # read in the maxent results thresholds
 results = read.csv(paste(sp.wd, "/maxentResults.csv", sep=""))
 if (results$Minimum.training.presence.area > 0.8) {
@@ -57,17 +65,11 @@ if (results$Minimum.training.presence.area > 0.8) {
 } else {
 	threshold = results$Equate.entropy.of.thresholded.and.original.distributions.logistic.threshold
 }
-
-# create binary predicted current distribution
-# make a copy of the vetted current distribution asc
-t.pred.cur.asc = predicted.cur.asc 
+# make a copy of the vetted current suitability distribution asc
+t.vet.suit.cur.asc = vet.suit.cur.asc 
 # apply threshold to change habitat suitability to binary
-t.pred.cur.asc[which(is.finite(t.pred.cur.asc) & t.pred.cur.asc>=threshold)] = 1
-t.pred.cur.asc[which(is.finite(t.pred.cur.asc) & t.pred.cur.asc<threshold)] = 0
-write.asc.gz(t.pred.cur.asc, "threshold.pred.cur.asc")
+t.vet.suit.cur.asc[which(is.finite(t.vet.suit.cur.asc) & t.vet.suit.cur.asc>=threshold)] = 1
+t.vet.suit.cur.asc[which(is.finite(t.vet.suit.cur.asc) & t.vet.suit.cur.asc<threshold)] = 0
+write.asc.gz(t.vet.suit.cur.asc, "threshold.vet.suit.cur.asc")
 
-# create binary vetted current distribution
-bird.clip.asc = asc.from.raster(bird.clip.raster)
-t.vet.cur.asc = t.pred.cur.asc*bird.clip.asc
-write.asc.gz(t.vet.cur.asc, "threshold.vet.cur.asc")
-#emg I think this is the one used in 009 script
+
