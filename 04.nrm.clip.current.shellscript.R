@@ -8,7 +8,6 @@ wd = "/rdsi/ccimpacts/NRM"
 
 # define taxa
 taxa = c("mammals", "birds", "reptiles", "amphibians")
-# EMG Note different script for birds 04.nrm.clip.current.birds.shellscript.R
 
 # create the individual shell scripts
 for (taxon in taxa) {

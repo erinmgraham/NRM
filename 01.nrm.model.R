@@ -25,7 +25,7 @@ for (taxon in taxa[1]) {
 	species = list.files(paste(taxon.dir, "/models", sep=""))
 
 	# for each species
-	for (sp in species[161]) {
+	for (sp in species[158]) {
 	
 		# for each scale
 #		for (m in 1:length(scales)) {

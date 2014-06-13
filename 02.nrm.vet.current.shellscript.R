@@ -10,7 +10,7 @@ wd = "/rdsi/ccimpacts/NRM"
 taxa = c("mammals", "birds", "reptiles", "amphibians")
 
 # create the individual shell scripts
-for (taxon in taxa) {
+for (taxon in taxa[4]) {
 
 	taxon.dir = paste(wd, "/", taxon, sep="")
 	

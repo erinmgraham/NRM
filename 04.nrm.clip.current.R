@@ -1,6 +1,5 @@
 # this script creates the species threshold vetted current asciis for NRM
-# it uses occurrence records and expert opinion to clip the maxent predicted distribution to the 
-#	empirical distribution
+# it uses occurrence records and expert opinion to clip the maxent predicted distribution to the empirical distribution
 
 # read in the arguments listed at the command line
 args=(commandArgs(TRUE))  
@@ -18,15 +17,14 @@ if(length(args)==0){
 library(SDMTools)
 source("/home/jc140298/NRM/dev/helperFunctions.R") # function getVettingThreshold
 
-# define the path to the vetting files
 vet.path = paste("/home/jc140298/NRM/vetting")
 
 # create the species specific working directory
 taxon.dir = paste(wd, "/", taxon, sep="")
 sp.wd = paste(taxon.dir, "/models/", sp, "/1km", sep="")
 		
-# create realized dir to hold output files
-real.wd = paste(sp.wd, "/realized", sep=""); dir.create(real.wd); setwd(real.wd)
+# create warren dir to hold output files
+warren.wd = paste(sp.wd, "/warren", sep=""); dir.create(warren.wd); setwd(warren.wd)
 	
 # read in the first three columns of the species occurrence file (SPPCODE, lon, lat)
 occur = read.csv(paste(sp.wd, "/occur.csv", sep=""))[1:3]
@@ -78,13 +76,10 @@ if (nrow(vet.ibra.changes) == 1) {
 #write.asc.gz(ibra.clip,"IBRA.1km.clip.asc") #write out the clipping ascii
 
 # read in the current maxent predicted distribution
-#predicted.cur.asc = read.asc.gz(paste(sp.wd, "/bioclim.asc.gz", sep="")) 
-# EMG use suitability instead(I think)
-# read in the current suitability distribution
-suitability.cur.asc = read.asc.gz(paste(sp.wd, "/suitability/bioclim_suitability.asc.gz", sep=""))
+predicted.cur.asc = read.asc.gz(paste(sp.wd, "/bioclim.asc.gz", sep="")) 
 # apply the region clipping asciis
-vet.suit.cur.asc = state.clip*ibra.clip*suitability.cur.asc 
-write.asc.gz(vet.suit.cur.asc, "vet.suit.cur.asc")
+vet.cur.asc = state.clip*ibra.clip*predicted.cur.asc 
+#write.asc.gz(vet.cur.asc , "vet.cur.asc")
 
 # create binary vetted current distribution
 # get the best threshold (expert vetting)
@@ -92,10 +87,10 @@ threshold = getVettingThreshold(taxon, sp.wd)
 if (sp == "Spilocuscus_maculatus") {
 	threshold = threshold*2
 }
-# make a copy of the vetted current suitability distribution asc
-t.vet.cur.asc = vet.suit.cur.asc 
+# make a copy of the vetted current distribution asc
+t.vet.cur.asc = vet.cur.asc 
 # apply threshold to change habitat suitability to binary
 t.vet.cur.asc[which(is.finite(t.vet.cur.asc) & t.vet.cur.asc>=threshold)] = 1
 t.vet.cur.asc[which(is.finite(t.vet.cur.asc) & t.vet.cur.asc<threshold)] = 0
-write.asc.gz(t.vet.cur.asc, "threshold.vet.suit.cur.asc")
-
+write.asc.gz(t.vet.cur.asc, "threshold.vet.cur.asc")
+#emg I think this is the one used in 009 script

@@ -1,5 +1,7 @@
 # this script will analyze the SDM outputs for various climate scenarios and produce summary info
-# for each year - 10/50/90 temp/precip min/max
+# for each region:
+# for the baseline - temp/precip min/max; biodiversity
+# for each year - 10/50/90 temp/precip min/max; 10/50/90 biodiversity gain/loss 
 
 # read in the arguments listed at the command line
 args=(commandArgs(TRUE))  
@@ -15,6 +17,10 @@ if(length(args)==0){
 }
 
 library(SDMTools)
+#library(raster)
+#library(maptools)
+#library(rgeos)
+#source("/home/jc140298/NRM/dev/helperFunctions.R") # function getVettingThreshold
 
 # create the species specific working directories
 taxon.dir = paste(wd, "/", taxon, sep="")
@@ -22,12 +28,13 @@ sp.wd = paste(taxon.dir, "/models/", sp, "/1km", sep="")
 dispersal.wd = paste(sp.wd, "/dispersal", sep="") 
 summary.wd = paste(sp.wd, "/summary", sep=""); dir.create(summary.wd); setwd(summary.wd)
 
-# define the years and scenarios low/hi
 eses = c("RCP45", "RCP85")
+#years = c(1990, seq(2015,2085,10)) # emg need to do something with the baseline
 years = seq(2015,2085,10)
 
-# read in 1km lon/lat 
-df.locs =  read.csv("/home/jc140298/NRM/1km_lat_lon.csv")
+# read in generic map to get lon/lat 
+df.locs =  asc2dataframe("/rdsi/ctbcc_data/Climate/CIAS/Australia/1km/bioclim_asc/current.76to05/bioclim_01.asc")
+# EMG could make this quicker using same loc's csv?
 
 # for each emission scenario
 for (es in eses) { cat(es,'\n')
@@ -42,27 +49,34 @@ for (es in eses) { cat(es,'\n')
 		scname = paste(es, "_", yr, sep="")
 	
 		# create a matrix to hold the year's projections, one column per GCM (proj)
-		df.proj = matrix(NA,nrow=length(df.locs$x),ncol=length(projfolders))
-		colnames(df.proj) = basename(projfolders)
-		
+		df.proj = data.frame(df.locs$x, df.locs$y)
+	
 		# read in each projection map and extract data values; one map per columns
 		for (i in 1:length(projfolders)) { cat(i, "...")
-
-			# extract values for each cell from the projection map
+		
+			# read in the projection map
 			filename = paste(projfolders[i], "/", yr, "_realized.asc.gz", sep="")
-			df.proj[,basename(projfolders[i])] = extract.data(data.frame(df.locs$x, df.locs$y), 
-				read.asc.gz(filename))
+			proj.map = read.asc.gz(filename)
+		
+			# extract values for each cell
+			df.proj[,basename(projfolders[i])] = extract.data(df.proj[,1:2], proj.map)
 
 		} # end for projection folders
 
 		# calculate 10,50,90 deciles for each location
-		out.deciles = apply(df.proj, 1, quantile, probs = c(0.10,0.50, 0.90), na.rm = TRUE, type=7)
+		out.deciles = apply(as.matrix(df.proj[,3:20]), 1, quantile, probs = c(0.10,0.50, 0.90),  
+			na.rm = TRUE, type=7)
 		#EMG not sure what type to use, 7 is the default
+		
+		# combine output and save
+		df.out = cbind(df.proj, t(out.deciles))
+		save(df.out, file=paste(summary.wd, "/", scname, "_values.RData", sep=""))	
+		#EMG Do I need to save these? Takes a lot of memory (8GB) and some space
 			
 		# use the deciles to create maps
-		tenth = data.frame(cbind(df.locs$x, df.locs$y,t(out.deciles)[1])); dataframe2asc(tenth, paste(scname, "_tenth", sep=""), gz=TRUE)
-		fiftieth = data.frame(cbind(df.locs$x, df.locs$y,t(out.deciles)[2])); dataframe2asc(fiftieth, paste(scname, "_fiftieth", sep=""), gz=TRUE)
-		ninetieth = data.frame(cbind(df.locs$x, df.locs$y,t(out.deciles)[3])); dataframe2asc(ninetieth, paste(scname, "_ninetieth", sep=""), gz=TRUE)
+		tenth = data.frame(df.out[,c(2,1,21)]); dataframe2asc(tenth, paste(scname, "_tenth", sep=""), gz=TRUE)
+		fiftieth = data.frame(df.out[,c(2,1,22)]); dataframe2asc(fiftieth, paste(scname, "_fiftieth", sep=""), gz=TRUE)
+		ninetieth = data.frame(df.out[,c(2,1,23)]); dataframe2asc(ninetieth, paste(scname, "_ninetieth", sep=""), gz=TRUE)
 
 	} # end for years		
 } # end es

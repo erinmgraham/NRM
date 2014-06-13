@@ -53,7 +53,8 @@ region.polys = c(state.poly, ibra.poly)
 for (i in 1:length(region.polys)) { cat(i,'of',length(region.polys),' region polys\n')
 
 	# create .pdf to save figure
-	png(file=paste(sp.wd, "/", sp, "_", regions[i], ".png", sep=""), width=28, height=19, units='cm', res=600)
+#	png(file=paste(sp.wd, "/", sp, "_", regions[i], ".png", sep=""), width=28, height=19, units='cm', res=600)
+png(file=paste(sp.wd, "/", sp, "_birdlife.png", sep=""), width=28, height=19, units='cm', res=600)
 	
 	# change margins to make pretty
 	par(mfrow=c(2,3), mar=c(0,0,0,0), oma=c(0,0,0,0))
@@ -61,8 +62,8 @@ for (i in 1:length(region.polys)) { cat(i,'of',length(region.polys),' region pol
 	# plot current projection with IBRA regions and occurrence points
 	image(r_ascfile, xlim=c(112.9,154), ylim=c(-43.7425,-8), axes=FALSE, col=rev(terrain.colors(255)))
 	points(occur$lon, occur$lat, pch=19, cex=0.25, col="red")
-	plot(region.polys[i][[1]], add=TRUE, lwd=0.15)
-
+#	plot(region.polys[i][[1]], add=TRUE, lwd=0.15)
+plot(bird, add=TRUE)
 
 	# add maps for each threshold
 	for (j in 1:length(thresholds)) { cat(j,'of',length(thresholds),' thresholds\n')
@@ -88,8 +89,8 @@ for (i in 1:length(region.polys)) { cat(i,'of',length(region.polys),' region pol
 		text(120, -15, paste("T", j, sep=""), cex=3)
 		
 		# add the region outline
-		plot(region.polys[i][[1]], add=TRUE, lwd=0.25)
-
+#		plot(region.polys[i][[1]], add=TRUE, lwd=0.25)
+plot(bird, add=TRUE)
 	}# end for threshold
 
 	# close the .png 

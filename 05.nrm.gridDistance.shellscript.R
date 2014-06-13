@@ -15,14 +15,14 @@ samp.spp = list(c(106,123,134,142,167,184,185,186,207,218), 	#mammals
 	c(41,79,104,281,314,431,437,503),					#reptiles
 	c(6,9,69,92,119,142,146,182,185,204))						#amphibians
 
-#for (taxon in taxa) {
+#for (taxon in taxa[3:4]) {
 taxon=taxa[3]
 	taxon.dir = paste(wd, "/", taxon, sep="")
 	
 	# get a list of species directories
 	species.names = list.files(paste(taxon.dir, "/models", sep="")) #get a list of all the species
 
-	for (sp in species.names[-samp.spp[[which(taxa==taxon)]]][81:120]) { # cycle through each of the species
+	for (sp in species.names[-samp.spp[[which(taxa==taxon)]]]) { # cycle through each of the species
 #sp=species.names[samp.spp[[3]][1]]
 #sp=species.names[206]
 		# create the species specific working directory
@@ -34,10 +34,10 @@ taxon=taxa[3]
 		shell.file = file(shell.file.name, "w")
 			cat('#!/bin/bash\n', file=shell.file)
 			cat('#PBS -j oe\n', file=shell.file) # combine stdout and stderr into one file
-			cat('#PBS -l pmem=8gb\n', file=shell.file)
-			cat('#PBS -l nodes=1:ppn=4\n', file=shell.file)
+			cat('#PBS -l pmem=12gb\n', file=shell.file)
+			cat('#PBS -l nodes=1:ppn=6\n', file=shell.file)
 #			cat('#PBS -q bigmem\n', file=shell.file)
-			cat('#PBS -l walltime=100:00:00\n', file=shell.file)
+			cat('#PBS -l walltime=9999:00:00\n', file=shell.file)
 			cat('cd $PBS_O_WORKDIR\n', file=shell.file)
 			cat('source /etc/profile.d/modules.sh\n', file=shell.file) # need for java
 			cat('module load java\n', file=shell.file) # need for maxent
@@ -47,7 +47,7 @@ taxon=taxa[3]
 
 		# submit job
 		system(paste("qsub ", shell.file.name, sep=""))
-		Sys.sleep(10)
+		Sys.sleep(5)
 
 		} # end for species
 #} # end for taxon
