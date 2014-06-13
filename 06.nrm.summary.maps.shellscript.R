@@ -9,15 +9,15 @@ wd = "/rdsi/ccimpacts/NRM"
 # define taxa
 taxa = c("mammals", "birds", "reptiles", "amphibians")
 
-for (taxon in taxa) {
-
+#for (taxon in taxa) {
+taxon=taxa[4]
 	taxon.dir = paste(wd, "/", taxon, sep="")
 	
 	# get a list of species directories
 	species.names = list.files(paste(taxon.dir, "/models", sep="")) #get a list of all the species
 
-	for (sp in species.names) { # cycle through each of the species
-
+#	for (sp in species.names[4:length(species.names)]) { # cycle through each of the species
+sp=species.names[1]
 		# create the species specific working directory
 		sp.wd = paste(taxon.dir, "/models/", sp, "/1km", sep="")
 
@@ -42,5 +42,5 @@ for (taxon in taxa) {
 		system(paste("qsub ", shell.file.name, sep=""))
 		Sys.sleep(5)
 
-	} # end for species
-} # end for taxon
+#	} # end for species
+#} # end for taxon
