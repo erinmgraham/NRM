@@ -16,7 +16,7 @@ scenarios.dir = "/rdsi/ctbcc_data/Climate/CIAS/Australia"
 maxent.jar = "/home/jc140298/maxent.jar" 
 
 # for each taxon
-for (taxon in taxa[1]) {
+for (taxon in taxa) {
 
 	# define the taxon dir
 	taxon.dir = paste(wd, "/", taxon, sep="")
@@ -25,11 +25,11 @@ for (taxon in taxa[1]) {
 	species = list.files(paste(taxon.dir, "/models", sep=""))
 
 	# for each species
-	for (sp in species[161]) {
+	for (sp in species) {
 	
 		# for each scale
-#		for (m in 1:length(scales)) {
-m=2		
+		for (m in 1:length(scales)) {
+	
 		# define the taxon specific background data
 		bkgd.data = paste(wd, "/", taxon, "/", scales[m], "_bkgd.csv", sep="")
 
@@ -47,7 +47,7 @@ m=2
 #			current.scenario = list.files(paste(scenarios.dir, "/", scales[m], "/baseline.76to05/bioclim_asc", sep=""), 
 #				full.names=TRUE)
 # EMG need to fix this for asc vs mxe and different scales
-		}
+		} # end if
 		future.scenarios.all = list.files(paste(scenarios.dir, "/", scales[m], "/bioclim_mxe", sep=""),
 			full.names=TRUE)
 		rcp.future.scenarios = future.scenarios.all[grep("RCP", future.scenarios.all)]
@@ -76,10 +76,11 @@ m=2
 				cat('java -cp ',maxent.jar, ' density.Project ',sp.wd, '/',sp, '.lambdas ',pr, ' ', basename(pr), '.asc nowriteclampgrid nowritemess fadebyclamping \n', sep="", file=shell.file)
 				# zip it
 				cat('gzip ', basename(pr), '.asc\n', sep="", file=shell.file)
-			}
+			} # end for
 		close(shell.file)
 		
 		system(paste("qsub ", shell.file.name, sep=""))
 		Sys.sleep(5) # wait 5 sec between job submissions
+		} # end scale
 	} # end for species
 } # end for taxon

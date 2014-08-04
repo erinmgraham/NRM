@@ -16,8 +16,6 @@ if(length(args)==0){
 }
 
 library(SDMTools)
-#library(raster)
-#library(rgdal) # for geotiff
 source("/home/jc140298/NRM/dev/helperFunctions.R") # function getVettingThreshold
 
 # create the species specific working directory
@@ -41,7 +39,7 @@ all.projections = basename(tfiles); all.projections = gsub("\\.asc\\.gz","",all.
 rcp.projections = grep("RCP85|RCP45", all.projections, value=TRUE) # only want hi and lo for now n=288
 scenarios = c("bioclim", rcp.projections)
 
-for (sc in scenarios[34:41]) {
+for (sc in scenarios) {
 	
 	# read in the maxent predicted distribution
 	predicted.asc = read.asc.gz(paste(sp.wd, "/", sc, ".asc.gz", sep="")) 

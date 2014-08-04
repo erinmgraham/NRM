@@ -1,4 +1,5 @@
-# create the shell script to set the arguments and project the models for each species and climate scenario
+# shellscripts to create vetting maps for experts to vet
+# NOTE "birds" have been vetted previously by Birdlife
 
 # define location of R scripts
 script.dir = "/home/jc140298/NRM/dev"
@@ -7,7 +8,7 @@ script.dir = "/home/jc140298/NRM/dev"
 wd = "/rdsi/ccimpacts/NRM"
 
 # define taxa
-taxa = c("mammals", "birds", "reptiles", "amphibians")
+taxa = c("mammals", "reptiles", "amphibians")
 
 # create the individual shell scripts
 for (taxon in taxa) {
@@ -44,6 +45,6 @@ for (taxon in taxa) {
 		# submit job
 		system(paste("qsub ", shell.file.name, sep=""))
 		Sys.sleep(5) # wait 5 sec between job submissions
+		
 	} # end for species
 } # end for taxon
-	

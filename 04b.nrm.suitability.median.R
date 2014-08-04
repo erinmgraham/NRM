@@ -31,7 +31,7 @@ df.locs =  read.csv("/home/jc140298/NRM/1km_lat_lon.csv")
 for (es in eses) { cat(es,'\n')
 
 	# list the projections
-	projfolders = list.files(suit.wd, pattern=es, full.names=TRUE)
+	projfolders = list.files(paste(sp.wd, "/suitability", sep=""), pattern=es, full.names=TRUE)
 
 	# for each year
 	for (yr in years) { cat(yr,'\n')
@@ -44,7 +44,7 @@ for (es in eses) { cat(es,'\n')
 	
 		# create a matrix to hold the year's projections, one column per GCM (proj)
 		df.proj = matrix(NA,nrow=length(df.locs$x),ncol=length(yr.projs))
-		colnames(df.proj) = basename(yr.projs)
+		colnames(df.proj) = substring(basename(yr.projs), 1, nchar(basename(yr.projs))-24)
 	
 		# read in each projection map and extract data values; one map per columns
 		for (i in 1:length(yr.projs)) { cat(i, "...")
@@ -61,7 +61,7 @@ for (es in eses) { cat(es,'\n')
 		#EMG not sure what type to use, 7 is the default
 			
 		# use the median to create maps
-		fiftieth = data.frame(cbind(df.locs$x, df.locs$y,t(out.median)[1]))
+		fiftieth = data.frame(cbind(df.locs$y, df.locs$x, out.median))
 		dataframe2asc(fiftieth, paste(scname, "_median_suitability", sep=""), gz=TRUE)
 	} # end for years		
 } # end es

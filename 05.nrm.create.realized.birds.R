@@ -1,5 +1,6 @@
-# this script creates the species threshold vetted current asciis for NRM
-# it uses occurrence records and expert opinion to clip the maxent predicted distribution to the empirical distribution
+# this script creates 1) a vetted current suitability map and 2) the thresholded 
+#	version which is used by the dispersal script
+# it uses state occurrence records and expert opinion to clip the suitability distributions
 
 # read in the arguments listed at the command line
 args=(commandArgs(TRUE))  
@@ -25,8 +26,6 @@ sp.wd = paste(taxon.dir, "/models/", sp, "/1km", sep="")
 # create realized dir to hold output files
 real.wd = paste(sp.wd, "/realized", sep=""); dir.create(real.wd); setwd(real.wd)
 
-## read in the current maxent predicted distribution
-#predicted.cur.asc = read.asc.gz(paste(sp.wd, "/bioclim.asc.gz", sep="")) 
 # read in the current suitability distribution
 suitability.cur.asc = read.asc.gz(paste(sp.wd, "/suitability/bioclim_suitability.asc.gz", sep=""))
 
@@ -71,5 +70,3 @@ t.vet.suit.cur.asc = vet.suit.cur.asc
 t.vet.suit.cur.asc[which(is.finite(t.vet.suit.cur.asc) & t.vet.suit.cur.asc>=threshold)] = 1
 t.vet.suit.cur.asc[which(is.finite(t.vet.suit.cur.asc) & t.vet.suit.cur.asc<threshold)] = 0
 write.asc.gz(t.vet.suit.cur.asc, "threshold.vet.suit.cur.asc")
-
-

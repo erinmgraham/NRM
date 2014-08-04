@@ -1,7 +1,7 @@
 # this script will apply dispersal limitations to NRM species distributions
-# first it reads in the current distribution (vetted and thresholded) and applies an 80yr dispersal buffer,
-# then it loops through the decadal projections, calculates the 10/50/90 percentile suitabilities
-#	and applies the distance dispersal map
+# first it reads in the current distribution (vetted and thresholded) and creates an 80yr dispersal buffer ascii
+# then it loops through the decadal projections, uses the dispersal map to create the projected dispersal
+#	distance clip and clips the suitability distribution
 
 # read in the arguments listed at the command line
 args=(commandArgs(TRUE))  

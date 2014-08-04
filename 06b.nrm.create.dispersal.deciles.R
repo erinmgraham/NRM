@@ -1,5 +1,4 @@
-# this script will analyze the SDM outputs for various climate scenarios and produce summary info
-# for each year - 10/50/90 temp/precip min/max
+# this script will produce decile (10/50/90) maps for each year's suitability projections
 
 # read in the arguments listed at the command line
 args=(commandArgs(TRUE))  
@@ -20,7 +19,7 @@ library(SDMTools)
 taxon.dir = paste(wd, "/", taxon, sep="")
 sp.wd = paste(taxon.dir, "/models/", sp, "/1km", sep="")
 dispersal.wd = paste(sp.wd, "/dispersal", sep="") 
-summary.wd = paste(sp.wd, "/summary", sep=""); dir.create(summary.wd); setwd(summary.wd)
+deciles.wd = paste(dispersal.wd, "/deciles", sep=""); dir.create(deciles.wd); setwd(deciles.wd)
 
 # define the years and scenarios low/hi
 eses = c("RCP45", "RCP85")
@@ -60,9 +59,9 @@ for (es in eses) { cat(es,'\n')
 		#EMG not sure what type to use, 7 is the default
 			
 		# use the deciles to create maps
-		tenth = data.frame(cbind(df.locs$x, df.locs$y,t(out.deciles)[1])); dataframe2asc(tenth, paste(scname, "_tenth", sep=""), gz=TRUE)
-		fiftieth = data.frame(cbind(df.locs$x, df.locs$y,t(out.deciles)[2])); dataframe2asc(fiftieth, paste(scname, "_fiftieth", sep=""), gz=TRUE)
-		ninetieth = data.frame(cbind(df.locs$x, df.locs$y,t(out.deciles)[3])); dataframe2asc(ninetieth, paste(scname, "_ninetieth", sep=""), gz=TRUE)
+		tenth = data.frame(cbind(df.locs$y, df.locs$x, t(out.deciles)[,1])); dataframe2asc(tenth, paste(scname, "_tenth", sep=""), gz=TRUE)
+		fiftieth = data.frame(cbind(df.locs$y, df.locs$x, t(out.deciles)[,2])); dataframe2asc(fiftieth, paste(scname, "_fiftieth", sep=""), gz=TRUE)
+		ninetieth = data.frame(cbind(df.locs$y, df.locs$x, t(out.deciles)[,3])); dataframe2asc(ninetieth, paste(scname, "_ninetieth", sep=""), gz=TRUE)
 
 	} # end for years		
 } # end es

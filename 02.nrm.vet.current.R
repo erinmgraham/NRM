@@ -94,4 +94,5 @@ for (i in 1:length(region.polys)) { cat(i,'of',length(region.polys),' region pol
 
 	# close the .png 
 	dev.off()
+	
 } # end for region

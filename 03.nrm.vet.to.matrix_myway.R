@@ -1,5 +1,5 @@
 # script to translate expert vetting into matrices of changes
-# this script uses an alternate way to 03.nrm.april.to.matrix.R (which uses over())
+# NOTE this script uses an alternate way to 03.nrm.vet.to.matrix.R (which uses over()) and
 # is faster for states matrices, slower for ibras
 
 library(maptools)
@@ -63,23 +63,11 @@ for (taxon in taxa) {
 			tr.current.asc[which(tr.current.asc < threshold)]=0
 			tr.current.asc[which(tr.current.asc >= threshold)]=1
 			rm("current.asc")
-			# plot the maps
-		#	plot(current.raster)
-		#	plot(polys, add=TRUE)
-
-			# add labels to regions
-		#	invisible(text(coordinates(polys), labels=as.character(polys$SP_ID), 
-		#		cex=1.5))
 
 			# want to know which regions are populated
 			# need a SpatialPointsDataFrame (class(meuse))
 			current.raster = raster(tr.current.asc)
 			rm("tr.current.asc")
-#			current.spdf = as(current.raster, "SpatialPointsDataFrame")
-#			rm("current.raster")
-			
-#			totals = over(polys, current.spdf, fn=sum)
-#			rm("current.spdf")
 
 			populated = rep(NA, length(region.names))
 			for (p in 1:length(region.names)) {

@@ -1,6 +1,6 @@
-# this script creates the species threshold vetted current asciis for NRM
-# it uses occurrence records and expert opinion to clip the maxent predicted distribution to the 
-#	empirical distribution
+# this script creates 1) a vetted current suitability map and 2) the thresholded 
+#	version which is used by the dispersal script
+# it uses state occurrence records and expert opinion to clip the suitability distributions
 
 # read in the arguments listed at the command line
 args=(commandArgs(TRUE))  
@@ -77,9 +77,6 @@ if (nrow(vet.ibra.changes) == 1) {
 }	# end if nrow
 #write.asc.gz(ibra.clip,"IBRA.1km.clip.asc") #write out the clipping ascii
 
-# read in the current maxent predicted distribution
-#predicted.cur.asc = read.asc.gz(paste(sp.wd, "/bioclim.asc.gz", sep="")) 
-# EMG use suitability instead(I think)
 # read in the current suitability distribution
 suitability.cur.asc = read.asc.gz(paste(sp.wd, "/suitability/bioclim_suitability.asc.gz", sep=""))
 # apply the region clipping asciis
@@ -98,4 +95,3 @@ t.vet.cur.asc = vet.suit.cur.asc
 t.vet.cur.asc[which(is.finite(t.vet.cur.asc) & t.vet.cur.asc>=threshold)] = 1
 t.vet.cur.asc[which(is.finite(t.vet.cur.asc) & t.vet.cur.asc<threshold)] = 0
 write.asc.gz(t.vet.cur.asc, "threshold.vet.suit.cur.asc")
-
