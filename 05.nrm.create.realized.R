@@ -38,7 +38,7 @@ vet.ibras = read.csv(paste(vet.path, "/", taxon, ".ibras.matrix_changed.csv", se
 	stringsAsFactors = FALSE)
 		
 # using the occurrences, create a state clipping ascii by excluding states where species does not occur
-state.clip = read.asc("/home/jc140298/NRM/State_1km_clipasc.asc")
+state.clip = read.asc.gz("/home/jc140298/NRM/State_1km_clipasc.asc.gz")
 states = extract.data(occur[,2:3], state.clip) #extract the regions occurrences fall within
 ustates = unique(states[!is.na(states)]) #identify the unique regions
 
@@ -61,7 +61,7 @@ state.clip[which(is.finite(state.clip))] = 0; state.clip[pos] = 1 #change everyt
 #write.asc.gz(state.clip,"State.1km.clip.asc") #write out the clipping ascii
 
 # now to the same for IBRAs
-ibra.clip = read.asc("/home/jc140298/NRM/IBRA_1km_clipasc.asc")
+ibra.clip = read.asc.gz("/home/jc140298/NRM/IBRA_1km_clipasc.asc.gz")
 #EMG not sure if clipping by IBRA occurrences is a good idea??
 #ibras = extract.data(occur[,2:3], ibra.clip) #extract the regions occurrences fall within
 #uibras = unique(ibras[!is.na(ibras)]) #identify the unique regions
