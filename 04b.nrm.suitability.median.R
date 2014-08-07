@@ -14,6 +14,7 @@ if(length(args)==0){
 }
 
 library(SDMTools)
+source("/home/jc140298/NRM/dev/helperFunctions.R") # my.dataframe2asc
 
 # create the species specific working directories
 taxon.dir = paste(wd, "/", taxon, sep="")
@@ -62,6 +63,6 @@ for (es in eses) { cat(es,'\n')
 			
 		# use the median to create maps
 		fiftieth = data.frame(cbind(df.locs$y, df.locs$x, out.median))
-		dataframe2asc(fiftieth, paste(scname, "_median_suitability", sep=""), gz=TRUE)
+		my.dataframe2asc(fiftieth, paste(scname, "_median_suitability", sep=""), gz=TRUE)
 	} # end for years		
 } # end es

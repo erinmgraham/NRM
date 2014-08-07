@@ -14,6 +14,7 @@ if(length(args)==0){
 }
 
 library(SDMTools)
+source("/home/jc140298/NRM/dev/helperFunctions.R") # my.dataframe2asc
 
 # create the species specific working directories
 taxon.dir = paste(wd, "/", taxon, sep="")
@@ -59,9 +60,9 @@ for (es in eses) { cat(es,'\n')
 		#EMG not sure what type to use, 7 is the default
 			
 		# use the deciles to create maps
-		tenth = data.frame(cbind(df.locs$y, df.locs$x, t(out.deciles)[,1])); dataframe2asc(tenth, paste(scname, "_tenth", sep=""), gz=TRUE)
-		fiftieth = data.frame(cbind(df.locs$y, df.locs$x, t(out.deciles)[,2])); dataframe2asc(fiftieth, paste(scname, "_fiftieth", sep=""), gz=TRUE)
-		ninetieth = data.frame(cbind(df.locs$y, df.locs$x, t(out.deciles)[,3])); dataframe2asc(ninetieth, paste(scname, "_ninetieth", sep=""), gz=TRUE)
+		tenth = data.frame(cbind(df.locs$y, df.locs$x, t(out.deciles)[,1])); my.dataframe2asc(tenth, paste(scname, "_tenth", sep=""), gz=TRUE)
+		fiftieth = data.frame(cbind(df.locs$y, df.locs$x, t(out.deciles)[,2])); my.dataframe2asc(fiftieth, paste(scname, "_fiftieth", sep=""), gz=TRUE)
+		ninetieth = data.frame(cbind(df.locs$y, df.locs$x, t(out.deciles)[,3])); my.dataframe2asc(ninetieth, paste(scname, "_ninetieth", sep=""), gz=TRUE)
 
 	} # end for years		
 } # end es
