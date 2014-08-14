@@ -4,10 +4,10 @@
 wd = "/rdsi/ccimpacts/NRM" 
 
 # define the taxa
-taxa =  c("mammals", "birds", "reptiles", "amphibians")
+taxa =  c("mammals", "birds", "reptiles", "amphibians", "weeds")
 
 # define the spatial scales
-scales = c("5km", "1km", "250m")
+scales = c("1km", "250m")
 
 # define the location of the environmental layers
 scenarios.dir = "/rdsi/ctbcc_data/Climate/CIAS/Australia"
@@ -46,11 +46,11 @@ for (taxon in taxa) {
 #		} else {
 #			current.scenario = list.files(paste(scenarios.dir, "/", scales[m], "/baseline.76to05/bioclim_asc", sep=""), 
 #				full.names=TRUE)
-# EMG need to fix this for asc vs mxe and different scales
+# EMG need to fix this for asc vs mxe and different scales once 250m bioclim are recreated
 		} # end if
 		future.scenarios.all = list.files(paste(scenarios.dir, "/", scales[m], "/bioclim_mxe", sep=""),
 			full.names=TRUE)
-		rcp.future.scenarios = future.scenarios.all[grep("RCP", future.scenarios.all)]
+		rcp.future.scenarios = future.scenarios.all[grep("RCP85|RCP45", future.scenarios.all)] # only want hi and lo
 		scenarios.torun = c(current.scenario, rcp.future.scenarios)
 
 		# create the shell file
@@ -60,7 +60,7 @@ for (taxon in taxa) {
 			cat('#PBS -j oe\n', file=shell.file) # combine stdout and stderr into one file
 			cat('#PBS -l pmem=8gb\n', file=shell.file)
 			cat('#PBS -l nodes=1:ppn=4\n', file=shell.file)
-			cat('#PBS -l walltime=100:00:00\n', file=shell.file)
+			cat('#PBS -l walltime=48:00:00\n', file=shell.file)
 			cat('cd $PBS_O_WORKDIR\n', file=shell.file)
 			cat('source /etc/profile.d/modules.sh\n', file=shell.file) # need for java
 			cat('module load java\n', file=shell.file) # need for maxent
