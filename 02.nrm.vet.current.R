@@ -45,9 +45,10 @@ r_ascfile = raster(ascfile)
 
 # get the regions to plot
 regions = c("state", "ibra")
-state.poly = readShapePoly("/home/jc148322/AP02/climate.summaries/region_layers/Shapefile/STE11aAust.shp")
-ibra.poly = readShapePoly("/home/jc148322/AP02/climate.summaries/region_layers/Shapefile/IBRA7_regions.shp")
-#nrm.poly = readShapePoly("/home/jc148322/AP02/climate.summaries/region_layers/Shapefile/NRM_Regions_2010.shp")
+state.poly = readShapePoly("/home/jc140298/NRM/State_poly.shp")
+ibra.poly = readShapePoly("/home/jc140298/NRM/IBRA_poly.shp")
+#nrm.poly = readShapePoly("/home/jc140298/NRM/NRM_poly.shp")
+
 region.polys = c(state.poly, ibra.poly)
 
 for (i in 1:length(region.polys)) { cat(i,'of',length(region.polys),' region polys\n')
