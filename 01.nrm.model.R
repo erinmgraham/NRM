@@ -1,7 +1,8 @@
 #script to run maxent model for NRM
 
 # define the working directory
-wd = "/rdsi/ccimpacts/NRM" 
+wd = "/rdsi/ccimpacts/NRM"
+pbs.dir = paste(wd, "/tmp.pbs", sep=""); setwd(pbs.dir)
 
 # define the taxa
 taxa =  c("mammals", "birds", "reptiles", "amphibians", "weeds")
@@ -34,7 +35,7 @@ for (taxon in taxa) {
 		bkgd.data = paste(wd, "/", taxon, "/", scales[m], "_bkgd.csv", sep="")
 
 		# set the species specific working directory argument
-		sp.wd = paste(taxon.dir, "/models/", sp, "/", scales[m], sep=""); setwd(sp.wd) 
+		sp.wd = paste(taxon.dir, "/models/", sp, "/", scales[m], sep="")
 		
 		# define the sp specific occur data
 		occur.data = paste(sp.wd, "/occur.csv", sep="")
@@ -54,13 +55,15 @@ for (taxon in taxa) {
 		scenarios.torun = c(current.scenario, rcp.future.scenarios)
 
 		# create the shell file
-		shell.file.name = paste(sp.wd, "/01.nrm.model.", sp, ".sh", sep="")
+		shell.file.name = paste(pbs.dir, "/01.nrm.model.", sp, ".sh", sep="")
+		
 		shell.file = file(shell.file.name, "w")
 			cat('#!/bin/bash\n', file=shell.file)
 			cat('#PBS -j oe\n', file=shell.file) # combine stdout and stderr into one file
-			cat('#PBS -l pmem=8gb\n', file=shell.file)
-			cat('#PBS -l nodes=1:ppn=4\n', file=shell.file)
+			cat('#PBS -l pmem=32gb\n', file=shell.file)
+			cat('#PBS -l nodes=1:ppn=1\n', file=shell.file)
 			cat('#PBS -l walltime=48:00:00\n', file=shell.file)
+#			cat('#PBS -l epilogue=/home/jc140298/epilogue/epilogue.sh\n', file=shell.file)
 			cat('cd $PBS_O_WORKDIR\n', file=shell.file)
 			cat('source /etc/profile.d/modules.sh\n', file=shell.file) # need for java
 			cat('module load java\n', file=shell.file) # need for maxent
@@ -71,12 +74,12 @@ for (taxon in taxa) {
 			# run maxent again on full model
 			cat('java -mx2048m -jar ',maxent.jar, ' -e ',bkgd.data, ' -s ',occur.data, ' -o ',sp.wd, ' nothreshold nowarnings novisible nowriteclampgrid nowritemess writeplotdata -P -J -r -a \n', sep="", file=shell.file)
 			
-			# project maxent model
-			for (pr in scenarios.torun) {
-				cat('java -cp ',maxent.jar, ' density.Project ',sp.wd, '/',sp, '.lambdas ',pr, ' ', basename(pr), '.asc nowriteclampgrid nowritemess fadebyclamping \n', sep="", file=shell.file)
-				# zip it
-				cat('gzip ', basename(pr), '.asc\n', sep="", file=shell.file)
-			} # end for
+#			# project maxent model
+#			for (pr in scenarios.torun) {
+#				cat('java -cp ',maxent.jar, ' density.Project ',sp.wd, '/',sp, '.lambdas ',pr, ' ', basename(pr), '.asc nowriteclampgrid nowritemess fadebyclamping \n', sep="", file=shell.file)
+#				# zip it
+#				cat('gzip ', basename(pr), '.asc\n', sep="", file=shell.file)
+#			} # end for
 		close(shell.file)
 		
 		system(paste("qsub ", shell.file.name, sep=""))

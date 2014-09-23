@@ -99,3 +99,31 @@ resampleRegion = function(region) {
 	df.resample$var.1 = resample.region
 	my.dataframe2asc(df.resample, filenames=paste("NRM/", regions, "_1km_clipasc", sep=""))
 }
+
+# this function removes birds that do not have polygons by name
+# I had an issue where "Anseranas_semipalmata" and "Anser_anser" were sorted differently
+removeBirds = function(species.names) {
+	noPolygons = c("Acrocephalus_stentoreus", "Aerodramus_terraereginae", "Alcedo_pusilla", 
+		"Amaurornis_moluccana", "Anas_gibberifrons", "Anas_platyrhynchos", "Anas_querquedula", 
+		"Anas_superciliosa", "Anhinga_novaehollandiae", "Anser_anser", "Ardea_cocoi", "Ardea_modesta",
+		"Arses_lorealis", "Cacomantis_pallidus", "Cairina_moschata", "Carduelis_chloris", "Certhionyx_niger", 
+		"Certhionyx_pectoralis", "Chrysococcyx_basalis", "Chrysococcyx_lucidus", "Chrysococcyx_minutillus", 
+		"Chrysococcyx_osculans", "Circus_aeruginosus", "Corvus_splendens", "Cuculus_saturatus", "Cygnus_olor", 
+		"Ducula_bicolor", "Egretta_sacra", "Elanus_caeruleus", "Eopsaltria_pulverulenta", "Esacus_magnirostris", 
+		"Excalfactoria_chinensis", "Gallus_gallus", "Heteromyias_cinereifrons", "Hirundo_ariel", 
+		"Ixobrychus_dubius", "Lalage_sueurii", "Lonchura_punctulata", "Meleagris_gallopavo", 
+		"Meliphaga_fordiana", "Motacilla_cinerea", "Motacilla_tschutschensis", "Numida_meleagris", 
+		"Pachycephala_griseiceps", "Pandion_cristatus", "Pavo_cristatus", "Petroica_boodang", 
+		"Phasianus_colchicus", "Phylidonyris_albifrons", "Podargus_papuensis", "Porzana_cinerea", 
+		"Pycnonotus_jocosus", "Rhipidura_albiscapa", "Rhipidura_dryas", "Sphecotheres_viridis", 
+		"Sterna_nereis", "Streptopelia_senegalensis", "Sturnus_vulgaris", "Turdus_philomelos", 
+		"Tyto_capensis", "Tyto_javanica")
+
+	new.species.names = species.names	
+	for (i in 1:length(noPolygons)) {
+
+		new.species.names = new.species.names[-which(new.species.names == noPolygons[i])]
+	}
+	
+	return(new.species.names)
+}

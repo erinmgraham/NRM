@@ -62,12 +62,41 @@ raster.vet.cur.asc[is.na(raster.vet.cur.asc)] = 3
 
 # create the distance dispersal raster
 gD.vet.cur = gridDistance(raster.vet.cur.asc, origin=1, omit=3)
+
+# write dispersal distance raster
 writeRaster(gD.vet.cur, paste(dispersal.wd, "/distance_current_", max(disp.dist), "m.asc", sep=""))
 system("gzip *.asc")
 
+# NOTE: if species is not present on both landmasses, gridDistance will not cross Tasman
+#	and either the mainland or Tasmania will be excluded and needs to be added back
+TasCheck = extract.data(cbind(147, -42), gD.vet.cur)
+if (is.na(TasCheck)) { cat("Tasmania is NOT present\n")
+	# read in a map with blank Tasmania (all 0's)
+	blankMap = read.asc.gz("/home/jc140298/scratch/blank_Tas_only_map.asc.gz")
+	# get positions of the zero's (land)
+	landPos = which(blankMap == 0)
+	# add back land
+	temp.asc = read.asc.gz(paste(dispersal.wd, "/distance_current_", max(disp.dist), "m.asc.gz", sep=""))
+	temp.asc[landPos] = 0
+	write.asc.gz(temp.asc, paste(dispersal.wd, "/distance_current_", max(disp.dist), "m", sep=""))
+} 
+OzCheck = extract.data(cbind(134, -25), gD.vet.cur)
+if (is.na(OzCheck)) { cat(" Australia is NOT present\n")
+	blankMap = read.asc.gz("/home/jc140298/scratch/blank_OZ_only_map.asc.gz")
+	landPos = which(blankMap == 0)
+	temp.asc = read.asc.gz(paste(dispersal.wd, "/distance_current_", max(disp.dist), "m.asc.gz", sep=""))
+	temp.asc[landPos] = 0
+	write.asc.gz(temp.asc, paste(dispersal.wd, "/distance_current_", max(disp.dist), "m", sep=""))
+}
+
+# read in dispersal dist asc 
+# if already created and you need to run smaller set of scenarios
+#gD.vet.cur.asc = read.asc.gz(paste(dispersal.wd, "/distance_current_", max(disp.dist), "m.asc.gz", sep=""))
+#temp.asc = gD.vet.cur.asc
+
 # for each decadal projection, clip the distance raster to be suitable for the time period, 
 #	apply a threshold to that time period's projection, and combine the maps
-for (sc in scenarios) { cat(sc,'\n')
+for (sc in scenarios[1:9]) { cat(sc,'\n')
 
 	# create a directory to hold the output
 	scenario.wd = paste(dispersal.wd, "/", sc, sep=""); dir.create(scenario.wd); setwd(scenario.wd)
@@ -76,14 +105,14 @@ for (sc in scenarios) { cat(sc,'\n')
 	
 		# read in the dispersal distance asc and convert it into a binary clipping asc
 		#	based on dispersal distance for that year's projection
-		raster.clip = gD.vet.cur
+		raster.clip = raster(temp.asc)
 		raster.clip[raster.clip <= disp.dist[dd]] = 1
 		raster.clip[raster.clip > disp.dist[dd]] = 0
 		writeRaster(raster.clip, paste("distance_clip_", years[dd], sep=""), format="ascii")
 # for troubleshooting
-#pdf(paste("distance_clip_", years[dd], ".pdf", sep=""))
-#plot(raster.clip)
-#dev.off()
+pdf(paste("distance_clip_", years[dd], ".pdf", sep=""))
+plot(raster.clip)
+dev.off()
 		# read in projected suitability distribution asc
 		proj.filename = paste(sp.wd, "/suitability/", sc, "_", years[dd], "_suitability.asc.gz", sep="")
 		proj.asc = read.asc.gz(proj.filename) 
@@ -94,9 +123,9 @@ for (sc in scenarios) { cat(sc,'\n')
 		disp.proj.asc = proj.asc*clip.asc
 		write.asc.gz(disp.proj.asc, paste(years[dd], "_realized.asc", sep=""))
 # for troubleshooting
-#pdf(paste(years[dd], "_realized.pdf", sep=""))
-#plot(raster(disp.proj.asc))
-#dev.off()
+pdf(paste(years[dd], "_realized.pdf", sep=""))
+plot(raster(disp.proj.asc))
+dev.off()
 		} # end for dd	
 	
 	system("gzip *.asc")

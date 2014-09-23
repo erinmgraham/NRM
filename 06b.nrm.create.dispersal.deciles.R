@@ -56,7 +56,7 @@ for (es in eses) { cat(es,'\n')
 		} # end for projection folders
 
 		# calculate 10,50,90 deciles for each location
-		out.deciles = apply(df.proj, 1, quantile, probs = c(0.10,0.50, 0.90), na.rm = TRUE, type=7)
+		out.deciles = apply(df.proj, 1, quantile, probs = c(0.10,0.50, 0.90), na.rm = TRUE, type=8)
 		#EMG not sure what type to use, 7 is the default
 			
 		# use the deciles to create maps

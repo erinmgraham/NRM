@@ -58,8 +58,7 @@ for (es in eses) { cat(es,'\n')
 		} # end for projection folders
 
 		# calculate median suitability for each location
-		out.median = apply(df.proj, 1, quantile, probs = c(0.50), na.rm = TRUE, type=7)
-		#EMG not sure what type to use, 7 is the default
+		out.median = apply(df.proj, 1, quantile, probs = c(0.50), na.rm = TRUE, type=8)
 			
 		# use the median to create maps
 		fiftieth = data.frame(cbind(df.locs$y, df.locs$x, out.median))
