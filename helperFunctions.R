@@ -100,10 +100,7 @@ resampleRegion = function(region) {
 	my.dataframe2asc(df.resample, filenames=paste("NRM/", regions, "_1km_clipasc", sep=""))
 }
 
-# this function removes birds that do not have polygons by name
-# I had an issue where "Anseranas_semipalmata" and "Anser_anser" were sorted differently
-removeBirds = function(species.names) {
-	noPolygons = c("Acrocephalus_stentoreus", "Aerodramus_terraereginae", "Alcedo_pusilla", 
+noPolygons = c("Acrocephalus_stentoreus", "Aerodramus_terraereginae", "Alcedo_pusilla", 
 		"Amaurornis_moluccana", "Anas_gibberifrons", "Anas_platyrhynchos", "Anas_querquedula", 
 		"Anas_superciliosa", "Anhinga_novaehollandiae", "Anser_anser", "Ardea_cocoi", "Ardea_modesta",
 		"Arses_lorealis", "Cacomantis_pallidus", "Cairina_moschata", "Carduelis_chloris", "Certhionyx_niger", 
@@ -118,7 +115,11 @@ removeBirds = function(species.names) {
 		"Pycnonotus_jocosus", "Rhipidura_albiscapa", "Rhipidura_dryas", "Sphecotheres_viridis", 
 		"Sterna_nereis", "Streptopelia_senegalensis", "Sturnus_vulgaris", "Turdus_philomelos", 
 		"Tyto_capensis", "Tyto_javanica")
-
+		
+# this function removes birds that do not have polygons by name
+# I had an issue where "Anseranas_semipalmata" and "Anser_anser" were sorted differently
+removeBirds = function(species.names) {
+	
 	new.species.names = species.names	
 	for (i in 1:length(noPolygons)) {
 
