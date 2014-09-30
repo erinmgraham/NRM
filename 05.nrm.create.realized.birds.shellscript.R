@@ -12,11 +12,8 @@ taxon = "birds"; taxon.dir = paste(wd, "/", taxon, sep="")
 
 # get a list of species directories
 species.names = list.files(paste(taxon.dir, "/models", sep="")) #get a list of all the species
-noPolygons = c(21,23,27,31,46,48,49,51,52,54,69,72,77,100,102,113,118,119,132:135,143,175,187,190,
-	204,209,211,219,229,235,248,279,283,288,292,319,344,346,368,369,397,409,418,426,432,448,454,
-	472,489,516,523,524,542,546,556,559,583,591,592)
 
-for (sp in species.names[-noPolygons]) { # cycle through each of the species
+for (sp in species.names) { # cycle through each of the species
 
 	# create the shell file
 	shell.file.name = paste(pbs.dir, "/05.nrm.create.realized.birds.", sp, ".sh", sep="")
