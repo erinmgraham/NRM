@@ -74,12 +74,13 @@ for (taxon in taxa) {
 			# run maxent again on full model
 			cat('java -mx2048m -jar ',maxent.jar, ' -e ',bkgd.data, ' -s ',occur.data, ' -o ',sp.wd, ' nothreshold nowarnings novisible nowriteclampgrid nowritemess writeplotdata -P -J -r -a \n', sep="", file=shell.file)
 			
-#			# project maxent model
-#			for (pr in scenarios.torun) {
-#				cat('java -cp ',maxent.jar, ' density.Project ',sp.wd, '/',sp, '.lambdas ',pr, ' ', basename(pr), '.asc nowriteclampgrid nowritemess fadebyclamping \n', sep="", file=shell.file)
-#				# zip it
-#				cat('gzip ', basename(pr), '.asc\n', sep="", file=shell.file)
-#			} # end for
+			# project maxent model
+			for (pr in scenarios.torun) {
+				outfilename = paste(sp.wd, "/", basename(pr), sep="")
+				cat('java -cp ',maxent.jar, ' density.Project ',sp.wd, '/',sp, '.lambdas ',pr, ' ', outfilename, '.asc nowriteclampgrid nowritemess fadebyclamping \n', sep="", file=shell.file)
+				# zip it
+				cat('gzip ', outfilename, '.asc\n', sep="", file=shell.file)
+			} # end for
 		close(shell.file)
 		
 		system(paste("qsub ", shell.file.name, sep=""))

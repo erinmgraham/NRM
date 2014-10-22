@@ -1,7 +1,5 @@
 # create shell files for deciles script
 
-source("/home/jc140298/NRM/dev/helperFunctions.R") # for removeBirds
-
 # define location of R scripts
 script.dir = "/home/jc140298/NRM/dev"
 
@@ -18,11 +16,6 @@ for (taxon in taxa) {
 	
 	# get a list of species directories
 	species.names = list.files(paste(taxon.dir, "/models", sep="")) #get a list of all the species
-	
-	if (taxon == "birds") { 
-		species.names = removeBirds(species.names)
-	}
-	# these birds don't have realized distributions (no vetting polygons available)
 	
 	for (sp in species.names) { # cycle through each of the species
 	

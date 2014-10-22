@@ -115,6 +115,9 @@ noPolygons = c("Acrocephalus_stentoreus", "Aerodramus_terraereginae", "Alcedo_pu
 		"Pycnonotus_jocosus", "Rhipidura_albiscapa", "Rhipidura_dryas", "Sphecotheres_viridis", 
 		"Sterna_nereis", "Streptopelia_senegalensis", "Sturnus_vulgaris", "Turdus_philomelos", 
 		"Tyto_capensis", "Tyto_javanica")
+#noPolygons = c(21,23,27,31,46,48,49,51,52,54,69,72,77,100,102,113,118,119,132:135,143,175,187,190,
+#	204,209,211,219,229,235,248,279,283,288,292,319,344,346,368,369,397,409,418,426,432,448,454,
+#	472,489,516,523,524,542,546,556,559,583,591,592)
 		
 # this function removes birds that do not have polygons by name
 # I had an issue where "Anseranas_semipalmata" and "Anser_anser" were sorted differently
