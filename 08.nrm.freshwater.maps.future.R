@@ -10,7 +10,7 @@ if(length(args)==0){
 	for(i in 1:length(args)) { 
 		eval(parse(text=args[[i]])) 
 	}
-	# expecting wd, taxon
+	# expecting wd, taxon, sp
 }
 
 library(SDMTools)
@@ -51,8 +51,18 @@ for (es in eses) {
 		
 			# use the dataframe of locations and values to generate asc
 			setwd(gcm.wd) # needed for dataframe2asc
-			my.dataframe2asc(tpos[,4:6], filenames=paste(yr, "_realized", sep=""), gz=TRUE)
+			my.dataframe2asc_plus9rows(tpos[,4:6], filenames=paste(yr, "_tpos.dataframe", sep=""), gz=TRUE)
 			rm(tpos)
+			
+			# need to remove holes (areas with no data) from converted asc
+			pos.asc = read.asc.gz(paste(yr, "_tpos.dataframe.asc.gz", sep="")) # read in asc
+			new.pos.asc = pos.asc # make a copy
+			new.pos.asc[is.na(new.pos.asc)] = 10 # change NA's to 10
+			base.asc = read.asc.gz("/home/jc140298/NRM/blank_map_1km.asc.gz") # read in blank asc
+			new.pos.asc = new.pos.asc + base.asc # combine asc's to put NA's in right place
+			new.pos.asc[new.pos.asc == 10] = 0 # change the remaining NA's to zero's (absences)
+			write.asc.gz(new.pos.asc, paste(yr, "_realized", sep="")) # write new asc
+
 		} # end for year
 	} # end for gcm
 } # end for scenario

@@ -8,9 +8,9 @@ wd = "/rdsi/ccimpacts/NRM"
 pbs.dir = paste(wd, "/tmp.pbs", sep=""); setwd(pbs.dir)
 
 # define taxa
-taxa = c("mammals", "birds", "reptiles", "amphibians") #, "weeds")
+taxa = c("mammals", "birds", "reptiles", "amphibians", "crayfish", "fish", "frog", "turtles") #, "weeds")
 	
-for (taxon in taxa) {
+for (taxon in taxa[5:8]) {
 
 	taxon.dir = paste(wd, "/", taxon, sep="")
 	

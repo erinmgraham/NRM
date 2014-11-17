@@ -41,23 +41,50 @@ for (taxon in taxa) { cat(taxon, "\n")
 # save output
 write.csv(sp.summary.out, paste(summary.dir, "/temp.combined.species.summary.csv", sep=""), row.names=FALSE)
 
-# collate summaries for each region into separate files
-# read in combined species output summary if not already in memory
-#sp.summary.out = read.csv(paste(summary.dir, "/temp.combined.species.summary.csv", sep=""))
-
 # define regions 
 regions = c("State", "IBRA", "NRM", "Kimberly", "NT")
 region.codes = read.csv("/home/jc140298/NRM/region.codes.csv", header=FALSE, stringsAsFactors=FALSE)
-	
+
+# define climate variables
+clim.vars = c("bioclim_01", "bioclim_12"); db.clim.vars = c("t", "p") # annual mean temperature, precipitation
+
+# collate all the climate variable data into single file
+clim.summary.out = NULL
+for (clim in clim.vars) {
+
+	clim.dir = paste(wd, "/climate/1km/", clim, "/deciles", sep="")
+	clim.summary.data = NULL
+			
+	for (reg in regions) {
+
+		reg.clim.data = read.csv(paste(clim.dir, "/", reg, ".summary.", clim, ".csv", sep=""), 
+			stringsAsFactors=FALSE)
+		clim.summary.data = rbind(clim.summary.data, reg.clim.data)
+		clim.name.fill = rep(clim, nrow(clim.summary.data))
+		clim.summary.prep = cbind(clim.name.fill, clim.summary.data); colnames(clim.summary.prep)[1] = "bioclim"
+		
+	}	
+	clim.summary.out = rbind(clim.summary.out, clim.summary.prep)
+} # end for clim	
+write.csv(clim.summary.out, paste(summary.dir, "/temp.climate.summary.csv", sep=""), row.names=FALSE)
+
+
+# collate summaries for each region into separate files
+# read in combined species and climate output summaries if not already in memory
+#sp.summary.out = read.csv(paste(summary.dir, "/temp.combined.species.summary.csv", sep=""))
+#clim.summary.out = read.csv(paste(summary.dir, "/temp.climate.summary.csv", sep=""))
+
 # define scenarios
 eses = c("RCP45", "RCP85"); db.eses = c("lo", "hi")
 years = seq(2015, 2085, 10)
 deciles = c("tenth", "fiftieth", "ninetieth"); db.deciles = c("10th", "50th", "90th")
 
-for (r in 1:length(regions)) { cat(regions[r], "\n")
+clim.vals = c("min", "max", "mean")
 
-	sub.regions = unique(sp.summary.out[sp.summary.out$region == regions[r],]$region_code)
+for (r in 1:length(regions)) { cat(regions[r], "\n")
 	
+	sub.regions = unique(sp.summary.out[sp.summary.out$region == regions[r],]$region_code)
+		
 	for (sr in sub.regions) { cat(sr, "\n")
 	
 		# create a file to hold output for region
@@ -65,16 +92,31 @@ for (r in 1:length(regions)) { cat(regions[r], "\n")
 		sub.region.name = gsub(" ", "_", sub.region.name) # replace spaces in name with underscores
 		outfilename = paste(summary.dir, "/", regions[r], "_", sub.region.name, ".txt", sep="")
 		write("{", file=outfilename, append=TRUE)
-		
+
+		# collate baseline data
+		# for climate
+		clim.sub.data = clim.summary.out[clim.summary.out$region == regions[r] & clim.summary.out$region_code == sr,]
+		curr.clim.sub.data = clim.sub.data[c(1:2,grep("current", colnames(clim.sub.data)))]
+		for (b in 1:length(clim.vars)) {
+
+			curr.bio.clim = curr.clim.sub.data[curr.clim.sub.data$bioclim == clim.vars[b],]
+			
+			for (val in clim.vals) {
+			
+				curr.value = as.numeric(curr.bio.clim[grep(val, colnames(curr.bio.clim))])
+				write(paste("\t\"baseline_", db.clim.vars[b], "_", val, "\": ", curr.value, ",", sep=""), 
+					file=outfilename, append=TRUE)
+			} # end for value
+		} # end for clim.vars	
+
+		# for all taxa		
 		sub.data = sp.summary.out[sp.summary.out$region == regions[r] & sp.summary.out$region_code == sr,]
 	
-		# collate baseline data
-		# for all taxa
 		all.count = nrow(sub.data[sub.data$current == 1,])
 		write(paste("\t\"baseline_b_all_count\": ", all.count, ",", sep=""), file=outfilename, 
 			append=TRUE)
 		# for each taxon
-		for (taxon in taxa) {
+		for (taxon in taxa[-5]) {
 			taxon.count = nrow(sub.data[sub.data$taxon.name == taxon & sub.data$current == 1,])
 			write(paste("\t\"baseline_b_", taxon, "_count\": ", taxon.count, ",", sep=""), 
 				file=outfilename, append=TRUE)
@@ -89,7 +131,21 @@ for (r in 1:length(regions)) { cat(regions[r], "\n")
 					# NOTE: DB and I named things differently
 					db.sc.name = paste(db.eses[e], "_", yr, sep="")	
 					sc.col.name = paste(eses[e], "_", yr, "_", deciles[d], sep="")		
-					
+
+					# for climate
+					sc.clim.sub.data = clim.sub.data[c(1:2,grep(sc.col.name, colnames(clim.sub.data)))]
+					for (b in 1:length(clim.vars)) {
+
+						sc.bio.clim = sc.clim.sub.data[sc.clim.sub.data$bioclim == clim.vars[b],]
+						
+						for (val in clim.vals) {
+						
+							sc.value = as.numeric(sc.bio.clim[grep(val, colnames(sc.bio.clim))])
+							write(paste("\t\"", db.sc.name, "_", db.clim.vars[b], "_", val, "_", db.deciles[d], "\": ", sc.value, ",", sep=""), 
+								file=outfilename, append=TRUE)
+						} # end for value
+					} # end for clim.vars
+		
 					# for all taxa
 					sc.all.count = nrow(sub.data[sub.data[,sc.col.name] == 1 | sub.data[,sc.col.name] == 4,])
 					write(paste("\t\"", db.sc.name, "_b_all_count_", db.deciles[d], "\": ", sc.all.count, ",", sep=""), 
@@ -105,7 +161,7 @@ for (r in 1:length(regions)) { cat(regions[r], "\n")
 						file=outfilename, append=TRUE)
 					
 					# for each taxon
-					for (taxon in taxa) {
+					for (taxon in taxa[-5]) {
 						sc.taxon.count = nrow(sub.data[sub.data$taxon.name == taxon & (sub.data[,sc.col.name] == 1 | sub.data[,sc.col.name] == 4),])
 						write(paste("\t\"", db.sc.name, "_b_", taxon, "_count_", db.deciles[d], "\": ", sc.taxon.count, ",", sep=""), 
 							file=outfilename, append=TRUE)
@@ -135,7 +191,7 @@ for (r in 1:length(regions)) { cat(regions[r], "\n")
 # create a single csv with all species and fields needed for sql query (see schema_and_data.sql)
 # e.g. class = 'amphibians'; scientific_name = 'Adelotus brevis'; region_types = 'State';
 #	shapefile_id = 4
-for (taxon in taxa[-c(1,5)]) { cat(taxon, "\n")
+for (taxon in taxa) { cat(taxon, "\n")
 
 	taxon.dir = paste(wd, "/", taxon, sep="")
 	
@@ -179,3 +235,5 @@ for (taxon in taxa[-c(1,5)]) { cat(taxon, "\n")
 } # end for taxon
 
 #write.csv(all.out, paste(summary.dir, "/summary.csv", sep=""), row.names=FALSE)
+#EMG in case Dan wants single file
+

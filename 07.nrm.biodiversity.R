@@ -17,27 +17,21 @@ if(length(args)==0){
 }
 
 library(SDMTools)
-source("/home/jc140298/NRM/dev/helperFunctions.R") # for removeBirds()
+
+source("/home/jc140298/NRM/dev/helperFunctions.R") # for getVettingThreshold()
 
 # set the species specific working directories
 taxon.dir = paste(wd, "/", taxon, sep="")
 biodiv.dir = paste(taxon.dir, "/biodiversity", sep=""); dir.create(biodiv.dir)
-	
+
 # get a list of species directories
 species.names = list.files(paste(taxon.dir, "/models", sep="")) #get a list of all the species
-if (taxon == "birds") {
-	species.names = removeBirds(species.names)
-}
-	
+
 # Part I : create one biodiversity map per taxa based on current realized maps
 if (doPart == "I") {
 
 	# read in a blank (all 0's) 1km asc to use as base map
-	if (taxon %in% c("mammals", "birds", "reptiles", "amphibians")) {
-		base.asc = read.asc.gz("/home/jc140298/NRM/blank_map_1km.asc.gz")
-	} else {	
-		base.asc = read.asc.gz("/home/jc140298/NRM/blank_map_1km_cassie.asc.gz")
-	}
+	base.asc = read.asc.gz("/home/jc140298/NRM/blank_map_1km.asc.gz")
 	
 	# cycle through each of the species
 	for (sp in species.names) { cat(which(species.names == sp),"...",sep="")
@@ -53,8 +47,11 @@ if (doPart == "I") {
 #pdf(paste(realized.wd, "/vet.suit.cur.pdf", sep=""))		
 #plot(raster(curr.asc))
 #dev.off()
-		# set any non-zero values to 1
-		curr.asc[which(is.finite(curr.asc) & curr.asc > 0)] = 1
+		# get and apply threshold
+		threshold = getVettingThreshold(taxon, sp.wd)
+		curr.asc[which(is.finite(curr.asc) & curr.asc >= threshold)] = 1		
+		curr.asc[which(is.finite(curr.asc) & curr.asc < threshold)] = 0
+
 		# add curr.asc to base.asc
 		base.asc = base.asc + curr.asc
 	} # end for species
@@ -99,8 +96,10 @@ if (doPart == "II") {
 					# read in the projected realized distribution
 					proj.asc = read.asc.gz(paste(sc.wd, "/", yr, "_realized.asc.gz",sep=""))
 	
-					# set any non-zero values to 1
-					proj.asc[which(is.finite(proj.asc) & proj.asc > 0)] = 1
+					# get and apply threshold
+					threshold = getVettingThreshold(taxon, sp.wd)
+					proj.asc[which(is.finite(proj.asc) & proj.asc >= threshold)] = 1		
+					proj.asc[which(is.finite(proj.asc) & proj.asc < threshold)] = 0
 
 					# add curr.asc to sc.base.asc
 					sc.base.asc = sc.base.asc + proj.asc
@@ -124,10 +123,10 @@ if (doPart == "III") {
 	dec.out = paste(biodiv.dir, "/deciles", sep=""); dir.create(dec.out)
 	
 	# for each emission scenario
-	for (es in eses[1]) { cat(es,"\n")
+	for (es in eses[2]) { cat(es,"\n")
 	
 		# for each year			
-		for (yr in years) { cat(yr,"\n")
+		for (yr in years[4:8]) { cat(yr,"\n")
 		
 			# for each deciles
 			for (dec in deciles) { cat(dec,"\n")
@@ -147,10 +146,12 @@ if (doPart == "III") {
 					
 					# read in the projected realized distribution
 					dec.asc = read.asc.gz(paste(dispersal.wd, "/", dec.name, ".asc.gz",sep="" ))
-				
-					# set any non-zero values to 1
-					dec.asc[dec.asc > 0] = 1
 
+					# get and apply threshold
+					threshold = getVettingThreshold(taxon, sp.wd)
+					dec.asc[which(is.finite(dec.asc) & dec.asc >= threshold)] = 1		
+					dec.asc[which(is.finite(dec.asc) & dec.asc < threshold)] = 0
+					
 					# add curr.asc to dec.base.asc
 					dec.base.asc = dec.base.asc + dec.asc
 				} # end for spp

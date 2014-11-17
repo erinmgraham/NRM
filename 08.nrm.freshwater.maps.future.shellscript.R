@@ -10,7 +10,7 @@ pbs.dir = paste(wd, "/tmp.pbs", sep=""); setwd(pbs.dir)
 # define taxa
 taxa = c("crayfish", "fish", "frog", "turtles")
 
-for (taxon in taxa[c(1,3,4)]) {
+for (taxon in taxa) {
 
 	taxon.dir = paste(wd, "/", taxon, sep="")
 	
@@ -27,7 +27,7 @@ for (taxon in taxa[c(1,3,4)]) {
 			cat('#PBS -j oe\n', file=shell.file) # combine stdout and stderr into one file
 			cat('#PBS -l pmem=4gb\n', file=shell.file)
 			cat('#PBS -l nodes=1:ppn=1\n', file=shell.file)
-			cat('#PBS -l walltime=5:00:00\n', file=shell.file)
+			cat('#PBS -l walltime=12:00:00\n', file=shell.file)
 #			cat('#PBS -l epilogue=/home/jc140298/epilogue/epilogue.sh\n', file=shell.file)
 			cat('cd $PBS_O_WORKDIR\n', file=shell.file)
 			cat('module load R\n', file=shell.file) # need for R

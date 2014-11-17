@@ -70,7 +70,7 @@ system("gzip *.asc")
 temp.asc = read.asc.gz(paste(dispersal.wd, "/distance_current_", max(disp.dist), "m.asc.gz", sep=""))
 # NOTE: if species is not present on both landmasses, gridDistance will not cross Tasman
 #	and either the mainland or Tasmania will be excluded and needs to be added back
-TasCheck = extract.data(cbind(147, -42), gD.vet.cur)
+TasCheck = extract.data(cbind(147, -42), temp.asc)
 if (is.na(TasCheck)) { cat("Tasmania is NOT present\n")
 	# read in a map with blank Tasmania (all 0's)
 	blankMap = read.asc.gz("/home/jc140298/scratch/blank_Tas_only_map.asc.gz")
@@ -80,7 +80,7 @@ if (is.na(TasCheck)) { cat("Tasmania is NOT present\n")
 	temp.asc[landPos] = 0
 	write.asc.gz(temp.asc, paste(dispersal.wd, "/distance_current_", max(disp.dist), "m", sep=""))
 } 
-OzCheck = extract.data(cbind(134, -25), gD.vet.cur)
+OzCheck = extract.data(cbind(134, -25), temp.asc)
 if (is.na(OzCheck)) { cat(" Australia is NOT present\n")
 	blankMap = read.asc.gz("/home/jc140298/scratch/blank_OZ_only_map.asc.gz")
 	landPos = which(blankMap == 0)

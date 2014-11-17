@@ -13,8 +13,6 @@ if(length(args)==0){
 	# expecting wd, taxon, sp
 }
 
-source("/home/jc140298/NRM/dev/helperFunctions.R") # for getVettingThreshold()
-
 library(SDMTools)
 library(raster)
 
@@ -27,9 +25,19 @@ deciles.dir = paste(sp.wd, "/dispersal/deciles", sep="")
 # read in base base csv with region locations
 base.csv = read.csv(paste(nrm.dir, "/region.pos.csv", sep=""))
 
+source("/home/jc140298/NRM/dev/helperFunctions.R") # for getVettingThreshold()
+threshold = getVettingThreshold(taxon, sp.wd)
+
 # create a summary csv of presence/absence in each location(cell)
 # extract current presence/absence
-curr.real.asc = read.asc.gz(paste(sp.wd, "/realized/threshold.vet.suit.cur.asc.gz", sep=""))
+if (taxon %in% c("mammals", "birds", "reptiles", "amphibians")) {
+	curr.real.asc = read.asc.gz(paste(sp.wd, "/realized/threshold.vet.suit.cur.asc.gz", sep=""))
+} else { # threshold not applied to current asc for freshwater species
+	vet.asc = read.asc.gz(paste(sp.wd, "/realized/vet.suit.cur.asc.gz", sep=""))
+	curr.real.asc = vet.asc
+	curr.real.asc[which(is.finite(curr.real.asc) & curr.real.asc >= threshold)] = 1
+	curr.real.asc[which(is.finite(curr.real.asc) & curr.real.asc < threshold)] = 0
+}	
 current.vals = extract.data(cbind(base.csv$x, base.csv$y), raster(curr.real.asc))
 base.csv[,"current"] = current.vals
 
@@ -38,7 +46,7 @@ base.csv[,"current"] = current.vals
 eses = c("RCP45", "RCP85")
 years = seq(2015, 2085, 10)
 deciles = c("tenth", "fiftieth", "ninetieth")
-Sys.time()
+
 for (es in eses) { cat(es, "\n")
 
 	for (yr in years) { cat(yr, "\n")
@@ -52,8 +60,7 @@ for (es in eses) { cat(es, "\n")
 			filename = paste(deciles.dir, "/", es, "_", yr, "_", dec, ".asc.gz", sep="")
 			proj.asc = read.asc.gz(filename)
 
-			# get vettting threshold and apply it
-			threshold = getVettingThreshold(taxon, sp.wd)
+			# apply vetting threshold
 			t.proj.asc = proj.asc
 			t.proj.asc[which(is.finite(t.proj.asc) & t.proj.asc>=threshold)] = 1
 			t.proj.asc[which(is.finite(t.proj.asc) & t.proj.asc<threshold)] = 0
@@ -64,61 +71,30 @@ for (es in eses) { cat(es, "\n")
 		} # end deciles
 	} # end years
 } # end eses
-Sys.time()
-# EMG output too big and time consuming to save
 
 # create a summary file of presence/absence in each region	
 # define regions
 regions = c("State", "IBRA", "NRM", "Kimberly", "NT")
 #region.codes = read.csv(paste(nrm.dir, "/region.codes.csv", sep=""), header=FALSE, 
 #	stringsAsFactors=FALSE)
+sp.summary = NULL
 
-# State
-# determine which column has region data
-state.col = which(colnames(base.csv) == "State")
-# restrict the data to that particular region and remove NA's
-state.data = as.matrix(na.omit(base.csv[,c(state.col,8:56)]))
-# group the data by state subregion and determine if present(1) or absent(1)
-state.summary = aggregate(state.data, list(state.data[,"State"]), FUN=max)
-# rename the first two columns and fill first column with region
-colnames(state.summary)[1:2] = c("region", "region_code");  state.summary[,1]="State"
-Sys.time()
+for (reg in regions) { cat(reg, "\n")
 
-# NRM
-nrm.col = which(colnames(base.csv) == "NRM")
-nrm.data = as.matrix(na.omit(base.csv[,c(nrm.col,8:56)]))
-nrm.summary = aggregate(nrm.data, list(nrm.data[,"NRM"]), FUN=max)
-colnames(nrm.summary)[1:2] = c("region", "region_code");  nrm.summary[,1]="NRM"
-Sys.time()
-
-# IBRA
-ibra.col = which(colnames(base.csv) == "IBRA")
-ibra.data = as.matrix(na.omit(base.csv[,c(ibra.col,8:56)]))
-ibra.summary = aggregate(ibra.data, list(ibra.data[,"IBRA"]), FUN=max)
-colnames(ibra.summary)[1:2] = c("region", "region_code");  ibra.summary[,1]="IBRA"
-Sys.time()
-
-# Kimberly
-kim.col = which(colnames(base.csv) == "Kimberly")
-kim.data = as.matrix(na.omit(base.csv[,c(kim.col,8:56)]))
-kim.summary = aggregate(kim.data, list(kim.data[,"Kimberly"]), FUN=max)
-colnames(kim.summary)[1:2] = c("region", "region_code");  kim.summary[,1]="Kimberly"
-Sys.time()
-
-# NT
-nt.col = which(colnames(base.csv) == "NT")
-nt.data = as.matrix(na.omit(base.csv[,c(nt.col,8:56)]))
-nt.summary = aggregate(nt.data, list(nt.data[,"NT"]), FUN=max)
-colnames(nt.summary)[1:2] = c("region", "region_code");  nt.summary[,1]="NT"
-Sys.time()
-
-# combine output into single dataframe 
-sp.summary = rbind(state.summary, nrm.summary, ibra.summary, kim.summary, nt.summary)
-Sys.time()
+	# determine which column has region data
+	region.col = which(colnames(base.csv) == reg)
+	# restrict the data to that particular region and remove NA's
+	region.data = as.matrix(na.omit(base.csv[,c(region.col,8:56)]))
+	# group the data by subregion and determine if present(1) or absent(1)
+	region.summary = aggregate(region.data, list(region.data[,reg]), FUN=max)
+	# rename the first two columns and fill first column with region
+	colnames(region.summary)[1:2] = c("region", "region_code");  region.summary[,1]=reg
+	sp.summary = rbind(sp.summary, region.summary)
+	Sys.time()
+} # end for region
 
 # save output
 write.csv(sp.summary, paste(deciles.dir, "/summary.presence.absence.csv", sep=""), row.names=FALSE)
-Sys.time()
 
 # copy output to create gain/loss dataframe
 gainloss = sp.summary

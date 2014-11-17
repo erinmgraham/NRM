@@ -10,12 +10,12 @@ pbs.dir = paste(wd, "/tmp.pbs", sep=""); setwd(pbs.dir)
 # define taxa
 taxa = c("mammals", "birds", "reptiles", "amphibians", "crayfish", "fish")
 
-doPart = "I"
+doPart = "III"
 # Part I : create one biodiversity map per taxa based on current realized maps
 # Part II : for each taxa, create one biodiversity map per scenario based on projected dispersal maps	
 # Part III : create one biodiversity map per es/year/decile combination based on projected dispersal maps
 	
-for (taxon in taxa[3]) {
+for (taxon in taxa[2]) {
 	
 	# create the shell file
 	shell.file.name = paste(pbs.dir, "/07.nrm.biodiversity.", taxon, ".part", doPart, ".sh", sep="")
